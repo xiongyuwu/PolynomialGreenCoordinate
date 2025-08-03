@@ -1,4 +1,37 @@
+# PolynomialGreenCoordinate
+Generates mesh deformation using cage-based or variational deformation methods based on Polynomial Green Coordinates.
 
+The program loads meshes and renders them using OpenGL.
+
+## External Libraries
+
+* [Eigen](http://eigen.tuxfamily.org)
+* [OpenMesh](https://www.openmesh.org) (Recommended version: OpenMesh 10.0)
+* [Qt](https://www.qt.io) (Recommended version: 5.14.2)
+* [Boost](https://www.boost.org) (Recommended version: 1.86.0)
+
+## Compilation
+
+```
+git clone -b master git@github.com:xiongyuwu\PolynomialGreenCoordinate.git
+cd PolynomialGreenCoordinate
+```
+
+Edit lines 15-17 of CmakeLists.txt to set the values of **EIGEN_PATH**,**OPENMESH_PATH** and **OPENMESH_LIB_PATH**
+
+Edit line 24 of CmakeList.txt to set the value of **CMAKE_PREFIX_PATH** to help find Qt
+
+Edit line 35 of CmakeList.txt to set the value of **BOOST_ROOT** to help find Boost
+
+```
+mkdir build && cd build
+cmake -A x64 ..
+```
+To view more information and outputs, enable Debug mode:
+```
+mkdir build && cd build
+cmake -A x64 -DDEBUG_MODE=ON ..
+```
 Open **PolynomialGreenCoordinate.sln**, select **PolynomialGreenCoordinate** as the startup project, and run.
 
 ## Usage
