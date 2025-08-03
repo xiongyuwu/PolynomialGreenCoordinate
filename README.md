@@ -7,8 +7,8 @@ The program is used to load meshes and render using OpenGL.
 ## External Libraries
 
 * [Eigen](http://eigen.tuxfamily.org/)
-* [OpenMesh](https://www.openmesh.org/), Recommended version: the latest 8.1(at Oct. 2020)
-* [Qt](https://www.qt.io/), Recommended version: 5.13.0
+* [OpenMesh](https://www.openmesh.org/), Recommended version: OpenMesh 10.0
+* [Qt](https://www.qt.io/), Recommended version: 5.14.2
 
 ## Compilation
 
