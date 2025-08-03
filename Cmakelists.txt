@@ -1,133 +1,112 @@
 cmake_minimum_required(VERSION 3.7)
 project(PolynomialGreenCoordinate)
 
-#设置不生成MinSizeRel;RelWithDebInfo
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
-add_definitions(/D_USE_MATH_DEFINES)
+add_compile_definitions(_USE_MATH_DEFINES)
 
 if(MSVC)
     add_compile_options(/bigobj)
 endif()
 
-#Complier
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    message(STATUS "编译器是gcc")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    message(STATUS "编译器是msvc")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-    message(STATUS "编译器是 msvc 或 AppleClang")
-    set(Qt5Core_DIR "D:/ProgramFiles/Qt/5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5Core")
-    set(Qt5Gui_DIR "D:/ProgramFiles/Qt/5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5Gui")
-    set(Qt5OpenGL_DIR "D:/ProgramFiles/Qt/5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5OpenGL")
-    set(Qt5Widgets_DIR "D:/ProgramFiles/Qt/5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5Widgets")
-    find_package(OpenGL REQUIRED)
-    include_directories(${OPENGL_INCLUDE_DIR})
-    find_package(GLUT REQUIRED)
-    include_directories(${GLUT_INCLUDE_DIR})
-endif()
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
 
-#path
-SET(EIGEN_PATH "D:/ProgramFiles/eigen-3.3.8")
-SET(OPENMESH_PATH "D:/ProgramFiles/OpenMesh 10.0 static/include")
-SET(OPENMESH_LIB_PATH "D:/ProgramFiles/OpenMesh 10.0 static/lib")
+set(EIGEN_INCLUDE_DIR "D:/ProgramFiles/eigen-3.3.8")
+set(OPENMESH_INCLUDE_DIR "D:/ProgramFiles/OpenMesh 10.0 static/include")
+set(OPENMESH_LIB_DIR "D:/ProgramFiles/OpenMesh 10.0 static/lib")
 
-#QT
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_PREFIX_PATH "D:/ProgramFiles/Qt/5.14.2/5.14.2/msvc2017_64")
-find_package(Qt5Widgets REQUIRED)  
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
-get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)# https://zhuanlan.zhihu.com/p/73469206，调用windepolyqt进行自动部署
-get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-find_program(DEPLOYQT_EXECUTABLE NAMES windeployqt macdeployqt HINTS "${_qt_bin_dir}")
+find_package(Qt5 COMPONENTS Widgets Core Gui OpenGL REQUIRED)
 
-# 指定 Boost 的安装路径
+get_target_property(QMAKE_EXEC Qt5::qmake IMPORTED_LOCATION)
+get_filename_component(QT_BIN_DIR "${QMAKE_EXEC}" DIRECTORY)
+find_program(DEPLOYQT_EXECUTABLE 
+    NAMES windeployqt macdeployqt 
+    HINTS "${QT_BIN_DIR}"
+    REQUIRED
+)
+
 set(BOOST_ROOT "D:/ProgramFiles/boost_1_86_0")
 find_package(Boost REQUIRED)
-
-# 或者，单独指定 Boost 的头文件和库目录
-include_directories("D:/ProgramFiles/boost_1_86_0")
-link_directories("D:/ProgramFiles/boost_1_86_0/stage/lib")
+include_directories(${Boost_INCLUDE_DIRS})
 
 set(QRC_SOURCE_FILES src/surfacemeshprocessing.qrc)
 qt5_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
 
-include_directories(${EIGEN_PATH})
-include_directories(${OPENMESH_PATH})
-link_directories(${OPENMESH_LIB_PATH})
-
-file (GLOB ANN_FILE
-    src/ANN/*
+include_directories(
+    ${EIGEN_INCLUDE_DIR}
+    ${OPENMESH_INCLUDE_DIR}
 )
 
-file (GLOB GUI_FILE
+link_directories(${OPENMESH_LIB_DIR})
+
+file(GLOB ANN_FILES src/ANN/*)
+file(GLOB GUI_FILES
     src/MeshViewer/Aux_Transform_Mesh_Dialog.h
     src/main.cpp
     src/MeshViewer/MainViewerWidget.*
     src/MeshViewer/MeshParamDialog.*
-    src/surfacemeshprocessing.cpp
-    src/surfacemeshprocessing.h
+    src/surfacemeshprocessing.*
 )
-
-file (GLOB MeshViewer_FILE
+file(GLOB MESHVIEWER_FILES
     src/MeshViewer/Auxiliary_Function_Mesh.cpp
     src/MeshViewer/BezierSurface.*
     src/MeshViewer/InteractiveViewerWidget.*
     src/MeshViewer/MeshDefinition.*
     src/MeshViewer/MeshViewerWidget.*
-	src/MeshViewer/PGC.*
+    src/MeshViewer/PGC.*
     src/MeshViewer/OpenglHeaders.h
     src/MeshViewer/QGLViewerWidget.*
 )
 
-add_executable(${PROJECT_NAME} ${SRCFILES} 
-    ${ANN_FILE}
-    ${GUI_FILE}
-    ${MeshViewer_FILE}
+add_executable(${PROJECT_NAME}
+    ${ANN_FILES}
+    ${GUI_FILES}
+    ${MESHVIEWER_FILES}
     ${QRC_FILES}
 )
 
-option(DebugMode "show detailed output" OFF)
-if(DebugMode)
-    target_compile_definitions(PolynomialGreenCoordinate PRIVATE DEBUG_MODE=1)
-    message(STATUS "Debug mode enabled - detailed output will be shown")
-else()
-    target_compile_definitions(PolynomialGreenCoordinate PRIVATE DEBUG_MODE=0)
-    message(STATUS "Debug mode disabled")
-endif()
+option(DEBUG_MODE "Enable detailed debug output" OFF)
+target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    DEBUG_MODE=$<IF:$<BOOL:${DEBUG_MODE}>,1,0>
+)
+message(STATUS "Debug mode: ${DEBUG_MODE}")
 
 if(WIN32)
-add_custom_command(TARGET ${PROJECT_NAME}
-POST_BUILD
-COMMAND ${DEPLOYQT_EXECUTABLE} "$<TARGET_FILE:${PROJECT_NAME}>"
-    --$<LOWER_CASE:$<CONFIG>> --qmldir ${CMAKE_SOURCE_DIR}
-)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${DEPLOYQT_EXECUTABLE} 
+            "$<TARGET_FILE:${PROJECT_NAME}>"
+            --$<LOWER_CASE:$<CONFIG>>
+            --no-compiler-runtime
+            --no-system-d3d-compiler
+        COMMENT "Deploying Qt dependencies..."
+    )
 endif()
 
-source_group(ANN FILES ${ANN_FILE})
-source_group(GUI FILES ${GUI_FILE})
-source_group(MeshViewer FILES ${MeshViewer_FILE})
+source_group(ANN FILES ${ANN_FILES})
+source_group(GUI FILES ${GUI_FILES})
+source_group("Mesh Viewer" FILES ${MESHVIEWER_FILES})
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui Qt5::OpenGL
-    optimized OpenMeshCore 
-    optimized OpenMeshTools
-    debug OpenMeshCored 
-    debug OpenMeshToolsd
+target_link_libraries(${PROJECT_NAME}
+    Qt5::Widgets 
+    Qt5::Core 
+    Qt5::Gui 
+    Qt5::OpenGL
+    ${OPENGL_LIBRARIES}
+    ${GLUT_LIBRARY}
+    OpenMeshCore
+    OpenMeshTools
 )
-if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-target_link_libraries(${PROJECT_NAME} 
-    opengl32
-    glu32   
-)
-elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-    target_link_libraries(${PROJECT_NAME} 
-    ${GLUT_LIBRARY} 
-    ${OPENGL_LIBRARY}
-)
+
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} opengl32 glu32)
+elseif(APPLE)
+    find_library(COCOA_LIBRARY Cocoa)
+    target_link_libraries(${PROJECT_NAME} ${COCOA_LIBRARY})
 endif()
