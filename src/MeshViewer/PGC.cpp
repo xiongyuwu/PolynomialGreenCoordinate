@@ -1082,21 +1082,7 @@ void PGC::do_optimize_control_points() {
 		read_position_constraints();
 		read_orientation_constraints();
 		read_rigidity_constraints();
-
-		std::string line;
-		std::ifstream smoothness_sample_points("smoothness_sample_points.txt");
-
-		while (std::getline(smoothness_sample_points, line)) {
-			std::istringstream iss(line);
-			std::vector<double> numbers;
-
-			double number;
-			while (iss >> number) {
-				numbers.push_back(number);
-			}
-			smoothness_constraints.push_back({ numbers[0],numbers[1] ,numbers[2] });
-		}
-		smoothness_sample_points.close();
+		read_smoothness_constraints();
 	}
 
 	std::vector<double> map_vertex_idx_and_control_point_to_deformation_para;
