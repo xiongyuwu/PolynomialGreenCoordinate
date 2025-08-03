@@ -1,4 +1,5 @@
-# Framework for surface mesh processing
+# Generate mesh deformation with cage-based deformation or variational deformation based on polynomial green coordinates. 
+
 
 The program is used to load meshes and render using OpenGL.
 
