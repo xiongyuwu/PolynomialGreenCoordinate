@@ -1,4 +1,4 @@
-#PolynomialGreenCoordinate
+# PolynomialGreenCoordinate
 Generate mesh deformation with cage-based deformation or variational deformation based on polynomial green coordinates. 
 
 
@@ -32,7 +32,7 @@ cmake -A x64 -DDebugMode=ON ..
 
 Open **PolynomialGreenCoordinate.sln**, select **PolynomialGreenCoordinate** as launch project, and run.
 
-##Usage
+## Usage
 Store cage mesh as "cage.obj", then put it in /PolynomialGreenCoordinate/build directory.
 If you want to run variational deformation, also put all constraints("fixed_vertices.txt", "position_constraints.txt", "polyline.off", "orientation_constraints.txt") in /PolynomialGreenCoordinate/build directory.
 If you want to generate cage-based deformation by reading deformed control points, store the control points data in "deformed_control_points.obj", then put it in /PolynomialGreenCoordinate/build directory.
@@ -56,14 +56,14 @@ Click "Move Position Constraints" buttom to generate real-time variational defor
 Click "Select Move Control Points" buttom to select multiple control points, then click "Move Control Points" buttom to generate cage-based deformation while moving these control points together.
 Click "Clear Selected Points" buttom to clear selected control points.
 
-#Example flow
+### Example flow
 real-time cage-based deformation with triangular cage:
 Put "cage.obj" in /PolynomialGreenCoordinate/build directory->load controlled mesh->click "Change Cage Mode Tri/Quad" buttom to use triangular cage->click "Record Origin Mesh" buttom to compute and write integral paras->click "Read Integral Para From Files" buttom to load precomputed integral datas->Click "Draw Control Point" and "Draw Cage" buttom to visualize cage and control points->Click "Move Control Point" buttom and drag control points to generate real-time cage-based deformation.
 
 real-time variational deformation with triangular cage:
 Put "cage.obj", "fixed_vertices.txt", "position_constraints.txt", "polyline.off", "orientation_constraints.txt" in /PolynomialGreenCoordinate/build directory->load controlled mesh->click "Change Cage Mode Tri/Quad" buttom to use triangular cage->click "Generate Para Complete Flow" buttom to generate variational deformation based on input constarints->click "Draw Move Vertices Action" buttom to visualize position constraints->click "Move Position Constraints" buttom and drag position constraints to generate real-time variational deformation.
 
-##Data Format
+## Data Format
 Here are required format of input constraints.
 ```fixed_vertices.txt
 #One line of integers, strore mesh vertex indices that need to fixed
