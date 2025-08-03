@@ -1,8 +1,6 @@
 # PolynomialGreenCoordinate
 Generates mesh deformation using cage-based or variational deformation methods based on Polynomial Green Coordinates.
 
-The program loads meshes and renders them using OpenGL.
-
 ## External Libraries
 
 * [Eigen](http://eigen.tuxfamily.org)
