@@ -1,10 +1,11 @@
 # PolynomialGreenCoordinate
 Generates mesh deformation using cage-based or variational deformation methods based on Polynomial Green Coordinates.
+The repository contains the source code for the research paper: http://staff.ustc.edu.cn/~fuxm/projects/CurvedGreen/Poly3DGreen.pdf
 
 ## External Libraries
 
-* [Eigen](http://eigen.tuxfamily.org)
-* [OpenMesh](https://www.openmesh.org) (Recommended version: OpenMesh 10.0)
+* [Eigen](http://eigen.tuxfamily.org) (Recommended version: 3.3.8)
+* [OpenMesh](https://www.openmesh.org) (Recommended version: 10.0 static)
 * [Qt](https://www.qt.io) (Recommended version: 5.14.2)
 * [Boost](https://www.boost.org) (Recommended version: 1.86.0)
 
@@ -15,11 +16,21 @@ git clone -b master git@github.com:xiongyuwu\PolynomialGreenCoordinate.git
 cd PolynomialGreenCoordinate
 ```
 
-Edit lines 15-17 of CmakeLists.txt to set the values of **EIGEN_PATH**,**OPENMESH_PATH** and **OPENMESH_LIB_PATH**
+Edit lines 14-16 of CmakeLists.txt to set the values of **EIGEN_PATH**,**OPENMESH_PATH** and **OPENMESH_LIB_PATH**.
 
-Edit line 24 of CmakeList.txt to set the value of **CMAKE_PREFIX_PATH** to help find Qt
+Edit line 23 of CmakeList.txt to set the value of **CMAKE_PREFIX_PATH** to help find Qt.
 
-Edit line 35 of CmakeList.txt to set the value of **BOOST_ROOT** to help find Boost
+Edit line 34 of CmakeList.txt to set the value of **BOOST_ROOT** to help find Boost.
+
+To avoid modifying CMakeLists.txt, you can install the required libraries in the following default locations:
+
+Eigen 3.3.8: D:/ProgramFiles/eigen-3.3.8
+
+OpenMesh 10.0 (Static): D:/ProgramFiles/OpenMesh 10.0 static
+
+Qt 5.14.2: D:/ProgramFiles/Qt/5.14.2
+
+Boost 1.86.0: D:/ProgramFiles/boost_1_86_0
 
 ```
 mkdir build && cd build
@@ -113,3 +124,10 @@ OFF
 10 2.0 0.0 0.0 0.0 0.5 -0.866 0 0.866 0.5
 ```
 
+## Data Sets
+Sample datasets are available in the model directory. Each dataset includes a mesh and its control cage. Some also contain deformed control points (for cage-based deformation) or constraints (for variational deformation). These resources enable reproduction of our paper's results.
+
+## Demo
+The demo directory contains giraffe.png (reference figure from our paper) and a script to generate its corresponding mesh. Run demo.exe to verify results, with outputs saved in deformed_mesh.obj.
+
+ 

@@ -1,0 +1,33 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# 查找依赖
+find_dependency(OpenGL)
+find_dependency(Qt5 COMPONENTS Core OpenGL)
+
+# 包含目标文件
+include("${CMAKE_CURRENT_LIST_DIR}/PolynomialGreenCoordinateTargets.cmake")
+
+# 设置包含路径
+set(PolynomialGreenCoordinate_INCLUDE_DIRS 
+    "@PACKAGE_INSTALL_INCLUDE_DIR@"
+    "@PACKAGE_INSTALL_INCLUDE_DIR@/Eigen"
+    "@PACKAGE_INSTALL_INCLUDE_DIR@/OpenMesh"
+    "@PACKAGE_INSTALL_INCLUDE_DIR@/boost"
+)
+
+# 查找 OpenMesh 库
+set(OPENMESH_CORE_LIB "@PACKAGE_INSTALL_LIB_DIR@/OpenMeshCore.lib")
+set(OPENMESH_TOOLS_LIB "@PACKAGE_INSTALL_LIB_DIR@/OpenMeshTools.lib")
+
+# 设置库文件变量
+set(PolynomialGreenCoordinate_LIBRARIES 
+    PolynomialGreenCoordinate::PGC_Core
+    ${OPENMESH_CORE_LIB}
+    ${OPENMESH_TOOLS_LIB}
+    ${OPENGL_LIBRARIES}
+)
+
+# 检查目标是否存在
+check_required_components(PolynomialGreenCoordinate)

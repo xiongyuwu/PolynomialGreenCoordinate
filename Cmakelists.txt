@@ -10,7 +10,6 @@ if(MSVC)
 endif()
 
 find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIR})
 
 set(EIGEN_INCLUDE_DIR "D:/ProgramFiles/eigen-3.3.8")
 set(OPENMESH_INCLUDE_DIR "D:/ProgramFiles/OpenMesh 10.0 static/include")
@@ -34,15 +33,9 @@ find_program(DEPLOYQT_EXECUTABLE
 
 set(BOOST_ROOT "D:/ProgramFiles/boost_1_86_0")
 find_package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
 
 set(QRC_SOURCE_FILES src/surfacemeshprocessing.qrc)
 qt5_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
-
-include_directories(
-    ${EIGEN_INCLUDE_DIR}
-    ${OPENMESH_INCLUDE_DIR}
-)
 
 link_directories(${OPENMESH_LIB_DIR})
 
@@ -65,11 +58,53 @@ file(GLOB MESHVIEWER_FILES
     src/MeshViewer/QGLViewerWidget.*
 )
 
-add_executable(${PROJECT_NAME}
+# 创建库目标（分离核心功能）
+add_library(PGC_Core STATIC
+    src/MeshViewer/Auxiliary_Function_Mesh.cpp
+    src/MeshViewer/BezierSurface.cpp
+    src/MeshViewer/InteractiveViewerWidget.cpp
+    src/MeshViewer/MeshDefinition.cpp
+    src/MeshViewer/MeshViewerWidget.cpp
+    src/MeshViewer/PGC.cpp
+    src/MeshViewer/QGLViewerWidget.cpp
     ${ANN_FILES}
+)
+
+# 使用生成器表达式修复包含路径问题
+target_include_directories(PGC_Core PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/MeshViewer>
+    $<INSTALL_INTERFACE:include/MeshViewer>
+    $<BUILD_INTERFACE:${EIGEN_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include/Eigen>
+    $<BUILD_INTERFACE:${OPENMESH_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include/OpenMesh>
+    $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+    $<INSTALL_INTERFACE:include>
+)
+
+# 添加核心库的依赖项
+target_link_libraries(PGC_Core PUBLIC
+    OpenMeshCore
+    OpenMeshTools
+    ${OPENGL_LIBRARIES}
+    ${GLUT_LIBRARY}
+    Qt5::Core
+    Qt5::OpenGL
+)
+if(WIN32)
+    target_link_libraries(PGC_Core PUBLIC opengl32 glu32)
+endif()
+
+# 可执行文件目标
+add_executable(${PROJECT_NAME}
     ${GUI_FILES}
     ${MESHVIEWER_FILES}
     ${QRC_FILES}
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    PGC_Core
+    Qt5::Widgets 
+    Qt5::Gui
 )
 
 option(DEBUG_MODE "Enable detailed debug output" OFF)
@@ -93,20 +128,92 @@ source_group(ANN FILES ${ANN_FILES})
 source_group(GUI FILES ${GUI_FILES})
 source_group("Mesh Viewer" FILES ${MESHVIEWER_FILES})
 
-target_link_libraries(${PROJECT_NAME}
-    Qt5::Widgets 
-    Qt5::Core 
-    Qt5::Gui 
-    Qt5::OpenGL
-    ${OPENGL_LIBRARIES}
-    ${GLUT_LIBRARY}
-    OpenMeshCore
-    OpenMeshTools
+# ========== 安装规则 ==========
+set(INSTALL_DIR "D:/ProgramFiles/PGC-Install")
+set(INSTALL_INCLUDE_DIR "${INSTALL_DIR}/include")
+set(INSTALL_LIB_DIR "${INSTALL_DIR}/lib")
+set(INSTALL_BIN_DIR "${INSTALL_DIR}/bin")
+set(INSTALL_CMAKE_DIR "${INSTALL_DIR}/cmake")
+
+# 安装核心库
+install(TARGETS PGC_Core EXPORT PGC_Targets
+    ARCHIVE  DESTINATION ${INSTALL_LIB_DIR}
+    RUNTIME  DESTINATION ${INSTALL_BIN_DIR}  # 对于DLL
+    INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}
 )
 
+# 安装可执行文件
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+    BUNDLE  DESTINATION ${INSTALL_BIN_DIR}
+)
+
+# 安装头文件（保持目录结构）
+file(GLOB_RECURSE PUBLIC_HEADERS 
+    "src/MeshViewer/*.h" 
+    "src/MeshViewer/*.hpp"
+)
+foreach(HEADER ${PUBLIC_HEADERS})
+    file(RELATIVE_PATH REL_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/src ${HEADER})
+    get_filename_component(HEADER_DIR ${REL_HEADER} DIRECTORY)
+    install(FILES ${HEADER}
+        DESTINATION ${INSTALL_INCLUDE_DIR}/${HEADER_DIR}
+    )
+endforeach()
+
+# 安装第三方依赖
+install(DIRECTORY ${EIGEN_INCLUDE_DIR}/Eigen 
+    DESTINATION ${INSTALL_INCLUDE_DIR}
+)
+install(DIRECTORY ${OPENMESH_INCLUDE_DIR}/OpenMesh
+    DESTINATION ${INSTALL_INCLUDE_DIR}
+)
+# 安装Boost头文件
+install(DIRECTORY ${Boost_INCLUDE_DIRS}/boost
+    DESTINATION ${INSTALL_INCLUDE_DIR}
+)
+
+# 安装OpenMesh库文件
+install(FILES 
+    ${OPENMESH_LIB_DIR}/OpenMeshCore.lib
+    ${OPENMESH_LIB_DIR}/OpenMeshTools.lib
+    DESTINATION ${INSTALL_LIB_DIR}
+)
+
+# 生成配置文件
+install(EXPORT PGC_Targets
+    FILE PolynomialGreenCoordinateTargets.cmake
+    NAMESPACE PolynomialGreenCoordinate::
+    DESTINATION ${INSTALL_CMAKE_DIR}
+)
+
+# 创建配置文件
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/PolynomialGreenCoordinateConfig.cmake
+    INSTALL_DESTINATION ${INSTALL_CMAKE_DIR}
+    PATH_VARS INSTALL_INCLUDE_DIR INSTALL_LIB_DIR
+)
+
+# 安装配置文件
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/PolynomialGreenCoordinateConfig.cmake
+    DESTINATION ${INSTALL_CMAKE_DIR}
+)
+
+# 安装Qt运行时（Windows）
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} opengl32 glu32)
-elseif(APPLE)
-    find_library(COCOA_LIBRARY Cocoa)
-    target_link_libraries(${PROJECT_NAME} ${COCOA_LIBRARY})
+    install(CODE [[
+        message(STATUS "Deploying Qt dependencies to ${CMAKE_INSTALL_PREFIX}/bin")
+        execute_process(
+            COMMAND "${DEPLOYQT_EXECUTABLE}"
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/$<TARGET_FILE_NAME:${PROJECT_NAME}>"
+                --$<LOWER_CASE:$<CONFIG>>
+                --no-compiler-runtime
+                --no-system-d3d-compiler
+                --dir "${CMAKE_INSTALL_PREFIX}/bin"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+    ]])
 endif()
