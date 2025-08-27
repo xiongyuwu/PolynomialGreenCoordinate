@@ -76,18 +76,20 @@ To generate cage-based deformation using precomputed control points, store the c
 1. Place "cage.obj" in \PolynomialGreenCoordinate\build
 2. Load controlled mesh
 3. Click **"Change Cage Mode Tri/Quad"** 
-4. Click **"Record Origin Mesh"**
-5. Click **"Read Integral Para From Files"**
-6. Click **"Draw Control Point"** and **"Draw Cage"**
-7. Click **"Move Control Point"** and drag control points
+4. Click **"Read Cage From File"**
+5. Click **"Record Origin Mesh"**
+6. Click **"Read Integral Para From Files"**
+7. Click **"Draw Control Point"** and **"Draw Cage"**
+8. Click **"Move Control Point"** and drag control points
 
 **Real-time variational deformation (triangular cage):**
 1. Place "cage.obj" and constraint files in \PolynomialGreenCoordinate\build
 2. Load controlled mesh
 3. Click **"Change Cage Mode Tri/Quad"** 
-4. Click **"Generate Para Complete Flow"**
-5. Click **"Draw Move Vertices Action"**
-6. Click **"Move Position Constraints"** and drag constraints
+4. Click **"Read Cage From File"**
+5. Click **"Generate Para Complete Flow"**
+6. Click **"Draw Move Vertices Action"**
+7. Click **"Move Position Constraints"** and drag constraints
 
 ## Data Formats
 **fixed_vertices.txt**
